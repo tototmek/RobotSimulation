@@ -70,7 +70,17 @@ namespace RobotSimulation
             if (!(hitTileX < nTiles && hitTileY < nTiles && hitTileX >= 0 && hitTileY >= 0)) return;
             double bel = tileArray[hitTileY][hitTileX].Bel;
             tileArray[hitTileY][hitTileX].Bel = bel + (1 - bel) * sampleCoeff / (1 - stddevFunc(distance));
+        }
 
+        public MapTile TileFromWorldPoint(double x, double y)
+        {
+            return tileArray[(int)Math.Floor(y / tileSize)][(int)Math.Floor(x / tileSize)];
+        }
+        public Point TileToWorldPoint(MapTile tile)
+        {
+            return new Point(
+                    (tile.gridY + 0.5) * tileSize,
+                    (tile.gridX + 0.5) * tileSize);
         }
 
         public void Reset()
@@ -81,7 +91,7 @@ namespace RobotSimulation
                 List<MapTile> temp_list = new List<MapTile>();
                 for (int j = 0; j < nTiles; j++)
                 {
-                    temp_list.Add(new MapTile());
+                    temp_list.Add(new MapTile(i, j));
                 }
                 tileArray.Add(temp_list);
             }
@@ -91,9 +101,137 @@ namespace RobotSimulation
     class MapTile
     {
         public double Bel;
-        public MapTile(double Bel_ = 0)
+        public int gridX;
+        public int gridY;
+        public int gCost;
+        public int hCost;
+        public MapTile parent;
+
+        public MapTile(int gridX, int gridY, double Bel = 0)
         {
-            Bel = Bel_;
+            this.Bel = Bel;
+            this.gridX = gridX;
+            this.gridY = gridY;
+        }
+
+        public int fCost
+        {
+            get
+            {
+                return gCost + hCost;
+            }
+        }
+
+        public bool walkable
+        {
+            get
+            {
+                return Bel <= 0.05;
+            }
+        }
+    }
+
+    class PathFinder
+    {
+        public Path FindPath(Point startPos, Point targetPos, MappingSystem map)
+        {
+            
+            MapTile startNode = map.TileFromWorldPoint(startPos.x, startPos.y);
+            MapTile targetNode = map.TileFromWorldPoint(targetPos.x, targetPos.y);
+
+            List<MapTile> openSet = new List<MapTile>();
+            HashSet<MapTile> closedSet = new HashSet<MapTile>();
+            openSet.Add(startNode);
+
+            while (openSet.Count > 0)
+            {
+                MapTile node = openSet[0];
+                for (int i = 1; i < openSet.Count; i++)
+                {
+                    if (openSet[i].fCost < node.fCost || openSet[i].fCost == node.fCost)
+                    {
+                        if (openSet[i].hCost < node.hCost)
+                            node = openSet[i];
+                    }
+                }
+
+                openSet.Remove(node);
+                closedSet.Add(node);
+
+                if (node == targetNode)
+                {
+                    return RetracePath(startNode, targetNode, map);
+                }
+
+                foreach (MapTile neighbour in GetNeighbours(node, map))
+                {
+                    if (!neighbour.walkable || closedSet.Contains(neighbour))
+                    {
+                        continue;
+                    }
+
+                    int newCostToNeighbour = node.gCost + GetDistance(node, neighbour);
+                    if (newCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                    {
+                        neighbour.gCost = newCostToNeighbour;
+                        neighbour.hCost = GetDistance(neighbour, targetNode);
+                        neighbour.parent = node;
+
+                        if (!openSet.Contains(neighbour))
+                            openSet.Add(neighbour);
+                    }
+                }
+            }
+            Trace.WriteLine("Path not found!");
+            return new Path();
+        }
+
+        public List<MapTile> GetNeighbours(MapTile tile, MappingSystem map)
+        {
+            List<MapTile> neighbours = new List<MapTile>();
+
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    if (x == 0 && y == 0)
+                        continue;
+
+                    int checkX = tile.gridX + x;
+                    int checkY = tile.gridY + y;
+
+                    if (checkX >= 0 && checkX < map.nTiles && checkY >= 0 && checkY < map.nTiles)
+                    {
+                        neighbours.Add(map.tileArray[checkX][checkY]);
+                    }
+                }
+            }
+
+            return neighbours;
+        }
+
+        private Path RetracePath(MapTile start, MapTile end, MappingSystem map)
+        {
+            Path path = new Path();
+            MapTile currentNode = end;
+
+            while (currentNode != start)
+            {
+                path.AddPoint(map.TileToWorldPoint(currentNode));
+                currentNode = currentNode.parent;
+            }
+            path.Reverse();
+            return path;
+        }
+
+        int GetDistance(MapTile nodeA, MapTile nodeB)
+        {
+            int dstX = Math.Abs(nodeA.gridX - nodeB.gridX);
+            int dstY = Math.Abs(nodeA.gridY - nodeB.gridY);
+
+            if (dstX > dstY)
+                return 14 * dstY + 10 * (dstX - dstY);
+            return 14 * dstX + 10 * (dstY - dstX);
         }
     }
 }

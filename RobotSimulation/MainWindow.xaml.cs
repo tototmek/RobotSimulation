@@ -16,12 +16,17 @@ namespace RobotSimulation
         private Robot robot;
         private RobotController robotController;
         private PathFollower pathFollower;
+        private PathFinder pathFinder;
         private List<IPhysicsComponent> physics;
         private GraphicsLayer graphics;
         private List<Obstacle> obstacles = new List<Obstacle>();
+        private Point target = new Point();
+
+        private Marker path_marker;
 
         const double PHYSICS_SAMPLE_TIME = 0.01;
         const double ROBOT_SYSTEM_TICK = 0.01;
+        const double ROBOT_MAPPING_TICK = 0.333;
 
         private List<Marker> markers = new List<Marker>();
 
@@ -41,12 +46,10 @@ namespace RobotSimulation
         private void CanvasMouseRightDown(object sender, MouseButtonEventArgs e)
         {
             //Add a point to robot Trajectory
-            Point point = graphics.MousePointToWorld(Mouse.GetPosition(graphics.GetCanvas()));
+            target = graphics.MousePointToWorld(Mouse.GetPosition(graphics.GetCanvas()));
             Trace.WriteLine("Clicked");
-            Trace.WriteLine(point.x + ", " + point.y);
-            pathFollower.path.AddPoint(point);
-            Trace.WriteLine(pathFollower.path.GetPoints().Count);
-            Trace.WriteLine(((PathMarker)markers[12]).path.GetPoints().Count);
+            Trace.WriteLine(target.x + ", " + target.y);
+            //pathFollower.path.AddPoint(point);
         }
 
         private void CanvasMouseLeave(object sender, MouseEventArgs e)
@@ -78,17 +81,22 @@ namespace RobotSimulation
             robotTick.Interval = TimeSpan.FromMilliseconds(ROBOT_SYSTEM_TICK * 1000);
             robotTick.Start();
 
+            DispatcherTimer robotMappingTick = new DispatcherTimer();
+            robotMappingTick.Tick += new EventHandler(RobotMappingTick);
+            robotMappingTick.Interval = TimeSpan.FromMilliseconds(ROBOT_MAPPING_TICK * 1000);
+            robotMappingTick.Start();
+
             robot = new Robot();
             //Setting wheel parameters
-            robot.wheels.left.diameter = 0.6667;
-            robot.wheels.left.maxSpeed = 2;
-            robot.wheels.left.maxAcceleration = 4;
+            robot.wheels.left.diameter = 0.380;
+            robot.wheels.left.maxSpeed = 4;
+            robot.wheels.left.maxAcceleration = 6;
             robot.wheels.left.encoder.stddev = 0.005;
-            robot.wheels.right.diameter = 0.6667;
-            robot.wheels.right.maxSpeed = 2;
-            robot.wheels.right.maxAcceleration = 4;
+            robot.wheels.right.diameter = 0.380;
+            robot.wheels.right.maxSpeed = 4;
+            robot.wheels.right.maxAcceleration = 6;
             robot.wheels.right.encoder.stddev = 0.005;
-            robot.wheelDistance = 1;
+            robot.wheelDistance = 0.5;
 
             //Attaching sensors to robot
             ProximitySensor s1 = new ProximitySensor();
@@ -112,7 +120,13 @@ namespace RobotSimulation
             lidar1.relativePosition = new Point(0, 0, 0);
             lidar1.sensor.stddev = stddev * 0.5;
             lidar1.range = 15;
-            lidar1.rotationSpeed = 0.033;
+            lidar1.rotationSpeed = 0.0333;
+            ProximitySensor lidar2 = new ProximitySensor();
+            robot.proximitySensors.Add(lidar2);
+            lidar2.relativePosition = new Point(0, 0, 0);
+            lidar2.sensor.stddev = stddev * 0.5;
+            lidar2.range = 15;
+            lidar2.rotationSpeed = -0.0333;
 
             //Creating controller for wheels
             WheelController controllerLeft = new WheelController(robot.wheels.left);
@@ -123,6 +137,7 @@ namespace RobotSimulation
             //Creating robot controller instance
             robotController = new RobotController(robot);
             pathFollower = new PathFollower(robotController, new Path());
+            pathFinder = new PathFinder();
 
             //Create graphics abstraction layer
             graphics = new GraphicsLayer(visualization);
@@ -135,27 +150,35 @@ namespace RobotSimulation
             physics.Add(robot.wheels.right);
             //Adding walls
             Point p1 = new Point(1, 1);
-            Point p2 = new Point(15, 1);
-            Point p3 = new Point(15, 10);
-            Point p7 = new Point(13, 5);
-            Point p8 = new Point(15, 5);
-            Point p4 = new Point(7, 10);
-            Point p5 = new Point(7, 6);
-            Point p6 = new Point(1, 6);
-            Obstacle ob1 = new Obstacle(p1, p2);
-            Obstacle ob2 = new Obstacle(p2, p3);
-            Obstacle ob3 = new Obstacle(p3, p4);
-            Obstacle ob4 = new Obstacle(p4, p5);
-            Obstacle ob5 = new Obstacle(p5, p6);
-            Obstacle ob6 = new Obstacle(p6, p1);
-            Obstacle ob7 = new Obstacle(p7, p8);
-            obstacles.Add(ob1);
-            obstacles.Add(ob2);
-            obstacles.Add(ob3);
-            obstacles.Add(ob4);
-            obstacles.Add(ob5);
-            obstacles.Add(ob6);
-            obstacles.Add(ob7);
+            Point p2 = new Point(1, 12);
+            Point p3 = new Point(1, 20);
+            Point p4 = new Point(10, 20);
+            Point p5 = new Point(16, 20);
+            Point p6 = new Point(16, 12);
+            Point p7 = new Point(20, 12);
+            Point p8 = new Point(20, 8);
+            Point p9 = new Point(20, 1);
+            Point p10 = new Point(6, 1);
+            Point p11 = new Point(6, 8);
+            Point p12 = new Point(16, 8);
+            Point p13 = new Point(18, 8);
+            Point p14 = new Point(14, 12);
+            Point p15 = new Point(12, 12);
+            Point p16 = new Point(10, 12);
+            Point p17 = new Point(6, 12);
+            Point p18 = new Point(4, 12);
+            obstacles.Add(new Obstacle(p1, p3));
+            obstacles.Add(new Obstacle(p3, p5));
+            obstacles.Add(new Obstacle(p6, p5));
+            obstacles.Add(new Obstacle(p7, p14));
+            obstacles.Add(new Obstacle(p7, p9));
+            obstacles.Add(new Obstacle(p1, p9));
+            obstacles.Add(new Obstacle(p10, p11));
+            obstacles.Add(new Obstacle(p12, p11));
+            obstacles.Add(new Obstacle(p13, p8));
+            obstacles.Add(new Obstacle(p2, p18));
+            obstacles.Add(new Obstacle(p17, p15));
+            obstacles.Add(new Obstacle(p4, p16));
             foreach (Obstacle obstacle in obstacles)
             {
                 Marker marker = new ObstacleMarker(obstacle);
@@ -165,6 +188,12 @@ namespace RobotSimulation
 
 
             //Add markers
+            path_marker = new PathMarker(pathFollower.path);
+            markers.Add(path_marker);
+            path_marker.AddTo(graphics);
+            Marker path_follower_marker = new PathFollowerMarker(pathFollower);
+            markers.Add(path_follower_marker);
+            path_follower_marker.AddTo(graphics);
             Marker robot_marker = new RobotMarker(robot);
             markers.Add(robot_marker);
             robot_marker.AddTo(graphics);
@@ -180,15 +209,11 @@ namespace RobotSimulation
             Marker lidar1_marker = new ProximitySensorMarker(lidar1);
             markers.Add(lidar1_marker);
             lidar1_marker.AddTo(graphics);
-            Marker path_marker = new PathMarker(pathFollower.path);
-            markers.Add(path_marker);
-            path_marker.AddTo(graphics);
-            Marker path_follower_marker = new PathFollowerMarker(pathFollower);
-            markers.Add(path_follower_marker);
-            path_follower_marker.AddTo(graphics);
-
+            Marker lidar2_marker = new ProximitySensorMarker(lidar2);
+            markers.Add(lidar2_marker);
+            lidar2_marker.AddTo(graphics);
             //Initialize map
-            mappingSystem = new MappingSystem(32, 0.5);
+            mappingSystem = new MappingSystem(42, 0.5);
             mapSysViz = new MappingSystemVisualization(mappingSystem, MapCanvas);
             mapSysViz.scale = 11;
             mapSysViz.Reset();
@@ -264,6 +289,12 @@ namespace RobotSimulation
                 }
             }
             pathFollower.Step(ROBOT_SYSTEM_TICK);
+        }
+
+        private void RobotMappingTick(object sender, EventArgs e)
+        {
+            pathFollower.path = pathFinder.FindPath(robot.position, target, mappingSystem);
+            ((PathMarker)path_marker).SetPath(pathFollower.path);
         }
 
         private void InitUI()

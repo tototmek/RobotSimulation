@@ -141,5 +141,10 @@ namespace RobotSimulation
         {
             return points;
         }
+
+        public void Reverse()
+        {
+            points.Reverse();
+        }
     }
 }

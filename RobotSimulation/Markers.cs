@@ -43,9 +43,9 @@ namespace RobotSimulation
             circle = new dCircle();
             circle.SetRadius(robot.wheelDistance * 0.5);
             wheelLeft = new dRect();
-            wheelLeft.SetSize(robot.wheels.left.diameter, 0.25);
+            wheelLeft.SetSize(robot.wheels.left.diameter, 0.12);
             wheelRight = new dRect();
-            wheelRight.SetSize(robot.wheels.right.diameter, 0.25);
+            wheelRight.SetSize(robot.wheels.right.diameter, 0.12);
             elements.Add(circle);
             elements.Add(wheelLeft);
             elements.Add(wheelRight);
@@ -79,6 +79,7 @@ namespace RobotSimulation
         {
             this.sensor = sensor;
             line = new dLine();
+            line.SetStrokeThickness(1.33);
             point = new dPoint();
             elements.Add(point);
             elements.Add(line);
@@ -130,7 +131,7 @@ namespace RobotSimulation
     class PathMarker : Marker
     {
         public Path path;
-        private int maxLength = 32;
+        private int maxLength = 80;
 
         public PathMarker(Path path)
         {
@@ -139,9 +140,14 @@ namespace RobotSimulation
             {
                 //Add a line
                 dLine line = new dLine();
-                line.SetColor(Brushes.Yellow);
+                line.SetColor(Brushes.White);
                 elements.Add(line);
             }
+        }
+
+        public void SetPath(Path path)
+        {
+            this.path = path;
         }
 
         public override void Update()
