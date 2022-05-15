@@ -1,0 +1,99 @@
+﻿<Window x:Class="RobotSimulation.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RobotSimulation"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="800" Width="1280">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="6*" />
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="4*" />
+            <RowDefinition Height="2*" />
+        </Grid.RowDefinitions>
+        <Canvas x:Name="visualization" ClipToBounds="true" Background="LightBlue" MouseLeftButtonDown="CanvasMouseDown" MouseRightButtonDown="CanvasMouseRightDown" MouseLeftButtonUp="CanvasMouseUp" MouseWheel="CanvasMouseWheel" MouseLeave="CanvasMouseLeave" Grid.ColumnSpan="2">
+        </Canvas>
+        <TabControl Grid.Column="2"  Margin="0,0,0,0">
+            <TabItem Header="Robot">
+                <Grid Background="#FFE5E5E5"  Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <GroupBox Header="Motors" HorizontalAlignment="Left" Height="225" Margin="10,10,0,0" VerticalAlignment="Top" Width="228">
+                        <StackPanel Margin="0,0,0,0">
+                            <Label x:Name="speedLabel" Content="Speed:"/>
+                            <Label x:Name="effortLabel" Content="Effort:"/>
+                            <Label x:Name="setPointLabel" Content="Setpoint:"/>
+                            <Separator Height="10" Margin="0"/>
+                            <Grid Height="115">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="88"/>
+                                    <RowDefinition/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <Rectangle x:Name="leftSpeedRect" Fill="#FF88AECD" Stroke="Black" Margin="4,0,1,0" Height="88" VerticalAlignment="Bottom"/>
+                                <Rectangle x:Name="rightSpeedRect" Fill="#FF88AECD" Stroke="Black" Margin="1,0,4,0" Grid.Column="1" Height="88" VerticalAlignment="Bottom"/>
+                                <Rectangle x:Name="leftAccelerationRect" Fill="#FFDE873F" Stroke="Black" Margin="4,0,1,0" Grid.Column="2" Height="88" VerticalAlignment="Bottom"/>
+                                <Rectangle x:Name="rightAccelerationRect" Fill="#FFDE873F" Stroke="Black" Margin="1,0,4,0" Grid.Column="3" Height="88" VerticalAlignment="Bottom"/>
+                                <Rectangle x:Name="leftSTPTRect" Fill="#FF5A9C50" Stroke="Black" Margin="4,0,1,0" Grid.Column="4" Height="88" VerticalAlignment="Bottom"/>
+                                <Rectangle x:Name="rightSTPTRect" Fill="#FF5A9C50" Stroke="Black" Margin="1,0,4,0" Grid.Column="5" Height="88" VerticalAlignment="Bottom"/>
+                                <Label Content="Setpoint" HorizontalAlignment="Left" Grid.Row="1" Width="61" Grid.ColumnSpan="3" Grid.Column="4" Margin="4,0,0,0"/>
+                                <Label Content="Accel." HorizontalAlignment="Left" Grid.Row="1" Width="61" Grid.ColumnSpan="3" Grid.Column="2" Margin="5,0,0,0"/>
+                                <Label Content="Speed" HorizontalAlignment="Left" Grid.Row="1" Width="61" Grid.ColumnSpan="3" Margin="5,0,0,0"/>
+                            </Grid>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="TabItem">
+                <Grid Background="#FFE5E5E5" Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0*"/>
+                        <ColumnDefinition Width="81*"/>
+                        <ColumnDefinition Width="43*"/>
+                    </Grid.ColumnDefinitions>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <GroupBox Grid.ColumnSpan="2" Grid.Column="1" Header="Mapping" HorizontalAlignment="Right" Height="236" Margin="0,0,10,10" Grid.Row="1" VerticalAlignment="Bottom" Width="489">
+            <Grid Margin="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" Margin="0">
+                    <CheckBox x:Name="MapCheckbox" Content="Enable"/>
+                    <Button Content="Reset" Click="Map_Reset_Button_Click"/>
+                </StackPanel>
+                <Canvas x:Name="MapCanvas" Margin="0" Background="#FFEAEAEA" ClipToBounds="true"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Navigation" Margin="0" Grid.Row="1">
+            <Grid Margin="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0">
+                    <Label Content="Right click to add point to path"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>
