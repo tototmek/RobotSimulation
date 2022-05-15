@@ -58,7 +58,7 @@ namespace RobotSimulation
                     {
                         double dist = Math.Sqrt(Math.Pow(rayOrigin.x - ((j + 0.5) * tileSize), 2) + Math.Pow(rayOrigin.y - ((i + 0.5) * tileSize), 2));
                         double bell = tileArray[i][j].Bel;
-                        tileArray[i][j] = new MapTile(bell - bell * 0.33 * sampleCoeff / (1 - stddevFunc(dist)));
+                        tileArray[i][j].Bel = bell - bell * 0.33 * sampleCoeff / (1 - stddevFunc(dist));
                         //tileArray[i][j] = new MapTile(1);
                     }
                 }
@@ -69,7 +69,7 @@ namespace RobotSimulation
             int hitTileY = (int)Math.Floor(hitPoint.y / tileSize);
             if (!(hitTileX < nTiles && hitTileY < nTiles && hitTileX >= 0 && hitTileY >= 0)) return;
             double bel = tileArray[hitTileY][hitTileX].Bel;
-            tileArray[hitTileY][hitTileX] = new MapTile(bel + (1 - bel) * sampleCoeff / (1 - stddevFunc(distance)));
+            tileArray[hitTileY][hitTileX].Bel = bel + (1 - bel) * sampleCoeff / (1 - stddevFunc(distance));
 
         }
 
@@ -88,7 +88,7 @@ namespace RobotSimulation
         }
     }
 
-    struct MapTile
+    class MapTile
     {
         public double Bel;
         public MapTile(double Bel_ = 0)
