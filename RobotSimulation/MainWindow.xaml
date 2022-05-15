@@ -61,13 +61,13 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="TabItem">
+            <TabItem Header="Simulation">
                 <Grid Background="#FFE5E5E5" Margin="0,0,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0*"/>
-                        <ColumnDefinition Width="81*"/>
-                        <ColumnDefinition Width="43*"/>
-                    </Grid.ColumnDefinitions>
+                    <StackPanel Margin="0">
+                        <Label x:Name="TimeScaleLabel" Content="Simulation Time Scale: x1" Margin="30,0"/>
+                        <Slider x:Name="TimeScaleSlider" Margin="20,0" Minimum="0.05" Maximum="4.5" Value="1"/>
+                    </StackPanel>
+                    <Label Content="Warning! Buggy as hell&#xD;&#xA;" HorizontalAlignment="Left" Margin="83,58,0,0" VerticalAlignment="Top"/>
                 </Grid>
             </TabItem>
         </TabControl>

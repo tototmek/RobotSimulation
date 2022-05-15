@@ -27,6 +27,7 @@ namespace RobotSimulation
         const double PHYSICS_SAMPLE_TIME = 0.01;
         const double ROBOT_SYSTEM_TICK = 0.01;
         const double ROBOT_MAPPING_TICK = 0.333;
+        double TIME_SCALE = 2.5;
 
         private List<Marker> markers = new List<Marker>();
 
@@ -231,7 +232,7 @@ namespace RobotSimulation
         {
             foreach (IPhysicsComponent component in physics)
             {
-                component.Update(PHYSICS_SAMPLE_TIME);
+                component.Update(PHYSICS_SAMPLE_TIME * TIME_SCALE);
             }
             //Update visualization
             foreach (Marker marker in markers)
@@ -272,14 +273,15 @@ namespace RobotSimulation
 
             //Sliders set the velocities
             //robotController.SetCommand(linearSpeedSlider.Value, angularSpeedSlider.Value);
-            
+            TIME_SCALE = TimeScaleSlider.Value;
+            TimeScaleLabel.Content = "Simulation Time Scale: x" + string.Format("{0:0.00}", TimeScaleSlider.Value);
 
             mapSysViz.Update();
         }
 
         private void RobotTick(object sender, EventArgs e)
         {
-            robot.Tick(ROBOT_SYSTEM_TICK);
+            robot.Tick(ROBOT_SYSTEM_TICK * TIME_SCALE);
             foreach(ProximitySensor sensor in robot.proximitySensors)
             {
                 double distance = sensor.Measure(obstacles);
@@ -288,7 +290,7 @@ namespace RobotSimulation
                     mappingSystem.ConsiderReading(sensor.position, sensor.hitPoint, distance, sensor.sensor.stddevFunc);
                 }
             }
-            pathFollower.Step(ROBOT_SYSTEM_TICK);
+            pathFollower.Step(ROBOT_SYSTEM_TICK * TIME_SCALE);
         }
 
         private void RobotMappingTick(object sender, EventArgs e)

@@ -50,10 +50,16 @@ namespace RobotSimulation
                 if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)
                 {
                     //Calculate the hitPoint
-                    actualHitPoint.x = x1 + (uA * (x2 - x1));
-                    actualHitPoint.y = y1 + (uA * (y2 - y1));
-                    double distance = Math.Sqrt(Math.Pow(position.x - actualHitPoint.x, 2) + Math.Pow(position.y - actualHitPoint.y, 2));
-                    min_distance = Math.Min(min_distance, distance);
+                    Point tempPoint = new Point();
+                    tempPoint.x = x1 + (uA * (x2 - x1));
+                    tempPoint.y = y1 + (uA * (y2 - y1));
+                    double distance = Math.Sqrt(Math.Pow(position.x - tempPoint.x, 2) + Math.Pow(position.y - tempPoint.y, 2));
+                    if (distance < min_distance)
+                    {
+                        min_distance = distance;
+                        actualHitPoint.x = tempPoint.x;
+                        actualHitPoint.y = tempPoint.y;
+                    }
                 }
             }
             isHit = !(min_distance > range);
