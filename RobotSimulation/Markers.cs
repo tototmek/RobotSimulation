@@ -11,7 +11,7 @@ namespace RobotSimulation
     {
         protected List<Drawable> elements = new List<Drawable>();
 
-        public void AddTo(GraphicsLayer graphics)
+        public virtual void AddTo(GraphicsLayer graphics)
         {
             foreach (Drawable element in elements)
             {
@@ -43,9 +43,9 @@ namespace RobotSimulation
             circle = new dCircle();
             circle.SetRadius(robot.wheelDistance * 0.5);
             wheelLeft = new dRect();
-            wheelLeft.SetSize(robot.wheels.left.diameter, 0.12);
+            wheelLeft.SetSize(robot.wheels.left.diameter, 0.19);
             wheelRight = new dRect();
-            wheelRight.SetSize(robot.wheels.right.diameter, 0.12);
+            wheelRight.SetSize(robot.wheels.right.diameter, 0.19);
             elements.Add(circle);
             elements.Add(wheelLeft);
             elements.Add(wheelRight);
@@ -131,18 +131,16 @@ namespace RobotSimulation
     class PathMarker : Marker
     {
         public Path path;
-        private int maxLength = 80;
+        private GraphicsLayer graphics;
 
         public PathMarker(Path path)
         {
             this.path = path;
-            for (int i = 0; i < maxLength; i++)
-            {
-                //Add a line
-                dLine line = new dLine();
-                line.SetColor(Brushes.White);
-                elements.Add(line);
-            }
+        }
+
+        public override void AddTo(GraphicsLayer graphics)
+        {
+            this.graphics = graphics;
         }
 
         public void SetPath(Path path)
@@ -152,12 +150,28 @@ namespace RobotSimulation
 
         public override void Update()
         {
-            var pathPoints = path.GetPoints();
-            int lineCount = pathPoints.Count - 1;
-            for (int i = 0; i < Math.Min(lineCount, maxLength); i++)
+            if (path.HasPoints())
             {
-                ((dLine)elements[i]).SetP1(pathPoints[i].x, pathPoints[i].y);
-                ((dLine)elements[i]).SetP2(pathPoints[i + 1].x, pathPoints[i + 1].y);
+                var pathPoints = path.GetPoints();
+                int lineCount = pathPoints.Count - 1;
+                while (elements.Count < lineCount)
+                {
+                    dLine line = new dLine();
+                    line.SetColor(Brushes.White);
+                    elements.Add(line);
+                    graphics.Add(line);
+                }
+                while (elements.Count > lineCount)
+                {
+                    Drawable line = elements[elements.Count - 1];
+                    elements.Remove(line);
+                    graphics.Remove(line);
+                }
+                for (int i = 0; i < lineCount; i++)
+                {
+                    ((dLine)elements[i]).SetP1(pathPoints[i].x, pathPoints[i].y);
+                    ((dLine)elements[i]).SetP2(pathPoints[i + 1].x, pathPoints[i + 1].y);
+                }
             }
         }
     }
@@ -171,7 +185,7 @@ namespace RobotSimulation
         {
             this.pathFollower = pathFollower;
             line = new dLine();
-            line.SetColor(Brushes.Yellow);
+            line.SetColor(Brushes.White);
             line.SetDashLine(3);
             elements.Add(line);
         }

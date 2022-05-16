@@ -89,15 +89,15 @@ namespace RobotSimulation
 
             robot = new Robot();
             //Setting wheel parameters
-            robot.wheels.left.diameter = 0.380;
+            robot.wheels.left.diameter = 0.50;
             robot.wheels.left.maxSpeed = 4;
             robot.wheels.left.maxAcceleration = 6;
             robot.wheels.left.encoder.stddev = 0.005;
-            robot.wheels.right.diameter = 0.380;
+            robot.wheels.right.diameter = 0.50;
             robot.wheels.right.maxSpeed = 4;
             robot.wheels.right.maxAcceleration = 6;
             robot.wheels.right.encoder.stddev = 0.005;
-            robot.wheelDistance = 0.5;
+            robot.wheelDistance = 0.667;
 
             //Attaching sensors to robot
             ProximitySensor s1 = new ProximitySensor();
@@ -295,7 +295,10 @@ namespace RobotSimulation
 
         private void RobotMappingTick(object sender, EventArgs e)
         {
-            pathFollower.path = pathFinder.FindPath(robot.position, target, mappingSystem);
+            pathFollower.path = pathFinder.OptimizePath(
+                pathFinder.FindPath(robot.position, target, mappingSystem),
+                obstacles,
+                3);
             ((PathMarker)path_marker).SetPath(pathFollower.path);
         }
 

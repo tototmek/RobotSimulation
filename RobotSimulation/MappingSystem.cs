@@ -233,5 +233,55 @@ namespace RobotSimulation
                 return 14 * dstY + 10 * (dstX - dstY);
             return 14 * dstX + 10 * (dstY - dstX);
         }
+
+        private Path OptimizePathIteration(Path oldPath, List<Obstacle> obstacles)
+        {
+            Path newPath = new Path();
+            bool collision;
+            List<Point> points = oldPath.GetPoints();
+            for (int i=0; i < points.Count - 2; i++)
+            {
+                collision = false;
+                foreach (Obstacle obstacle in obstacles)
+                {
+                    //Check for collisions
+                    double x1 = points[i].x;
+                    double y1 = points[i].y;
+                    double x2 = points[i+2].x;
+                    double y2 = points[i+2].y;
+                    double x3 = obstacle.p1.x;
+                    double y3 = obstacle.p1.y;
+                    double x4 = obstacle.p2.x;
+                    double y4 = obstacle.p2.y;
+                    // calculate the direction of the lines
+                    double uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+                    double uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+                    // if uA and uB are between 0-1, lines are colliding
+                    if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)
+                    {
+                        collision = true;
+                        break;
+                    }
+                }
+                newPath.AddPoint(points[i]);
+                //Skip point of index i+1
+                if (!collision) i++;
+            }
+            newPath.AddPoint(points[points.Count - 2]);
+            newPath.AddPoint(points[points.Count - 1]);
+            return newPath;
+        }
+
+        public Path OptimizePath(Path oldPath, List<Obstacle> obstacles, int iterations = 1)
+        {
+            if (oldPath.GetPoints().Count < 3) return oldPath;
+            Path newPath = new Path();
+            for (int i = 0; i < iterations; i++)
+            {
+                newPath = OptimizePathIteration(oldPath, obstacles);
+                oldPath = newPath;
+            }
+            return oldPath;
+        }
     }
 }

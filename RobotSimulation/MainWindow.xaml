@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:RobotSimulation"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1280">
+        Title="Robot Simulation" Height="800" Width="1280">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="6*" />
